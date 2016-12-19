@@ -1,98 +1,130 @@
 <?php
-
-//requisita a classe Contato.
-require_once("../Model/Contato.php");
-
-
-//verifica se recebeu por GET o parâmetro op.
-if (isset($_GET['op'])) {
-    $op = $_GET['op'];
-} else {
-    $op = "";
-}
+require_once("Model/Contato.php");
+require_once("Model/ContatoFactory.php");
 
 
-// para cada valor recebido em 'op', será realizada uma ação.
-switch ($op) {
-    case 'novo':// requisição par a cadastrar novo contato
-        include('../View/novo.php');
-        break;
+ 
+/*
+ * Material utilizado para as aulas práticas da disciplinas da Faculdade de
+ * Computação da Universidade Federal de Mato Grosso do Sul (FACOM / UFMS).
+ * Seu uso é permitido para fins apenas acadêmicos, todavia mantendo a
+ * referência de autoria.
+ *
+ *
+ *
+ * Classe controladora que define gerencia do fluxo da aplicação.
+ *
+ * @author Jane Eleutério 
+ * @version 2.0 - 19/Dez/2016
+ */
 
-    case 'cadastra':// requisição que recebe os parametros do contato e salva na sessão
-        //verifica se o formulário foi recebido via POST
+
+class Controller {
+
+    private $factory;
+
+    public function Controller() {
+
+        
+        $this->factory= new ContatoFactory();
+
+        ini_set('error_reporting', E_ALL);
+        ini_set('display_errors', 1);
+    }
+
+    public function init() {
+
+        if (isset($_GET['op'])) {
+            $op = $_GET['op'];
+        } else {
+            $op = "";
+        }
+
+        switch ($op) {
+            case 'novo':
+                $this->novo();
+                break;
+            case 'cadastra':
+                $this->cadastra();
+                break;
+            case 'lista':
+                $this->lista();
+                break;
+            case 'sair':
+                $this->out();
+                break;
+            default:
+                $this->index();
+                break;
+        }
+    }
+
+    public function index() {
+        require 'View/index.php';
+    }
+
+    public function novo() {
+        require 'View/novo.php';
+    }
+
+    public function cadastra() {
         if (isset($_POST['submit'])) {
-            //recebe os parâmetros
+
             $nome = $_POST['nome'];
             $email = $_POST['email'];
-
+            $sucesso = false;
             try {
-                //se algum campo não for preenchido, lança exceção
                 if ($nome == "" || $email == "")
                     throw new Exception('Erro');
 
-                // se a exceção não foi lançada acima, instancia um 
-                // objeto da classe contato
                 $contato = new Contato($nome, $email);
 
-                //inicia sessão
-                session_start('EmailContato');
+                //consulta o e-mail no banco
+                $result = $this->factory->buscar($email);
 
-                //verifica se a sessão já foi inicializada
-                if (!isset($_SESSION['agenda'])) {
-                    //inicia o vetor 'agenda' na sessão
-                    $_SESSION['agenda'] = array();
+                // se o resultado for igual a 0 itens, então salva contato
+                if (count($result) == 0) {
+                    $sucesso = $this->factory->salvar($contato);
                 }
 
-                //coloca o novo contato no final do vetor
-                array_push($_SESSION['agenda'], $contato);
-                
-                $sucesso = true;
 
-                //prepara as mensagens para o mostra.php
                 if ($sucesso) {
-                    $msg = "O contato " . $nome . " (" . $email . ") foi cadastrado com sucesso!";
+                    $msg = "<p>O contato " . $nome . " (" . $email . ") foi cadastrado com sucesso!</p>";
+                } else if (!$sucesso && count($result) > 0) {
+                    $msg = "<p>O contato n&atilde;o foi adicionado. E-mail j&aacute; existente na agenda!</p>";
                 } else {
-                    $msg = "O contato n&atilde;o foi adicionado. Tente novamente mais tarde!";
+                    $msg = "<p>O contato n&atilde;o foi adicionado. Tente novamente mais tarde!</p>";
                 }
-                //limpa as variáveis
+
                 unset($nome);
                 unset($email);
 
-                //inclui o mostra.php
-                include('../View/mensagem.php');
-            } catch (Exception $e) {//caso tenha lançado execeção
+
+                require 'View/mensagem.php';
+            } catch (Exception $e) {
                 if ($nome == "") {
                     $msg = "O campo <strong>Nome</strong> deve ser preenchido!";
                 } else if ($email == "") {
                     $msg = "O campo <strong>E-mail</strong> deve ser preenchido!";
                 }
-                include('../View/mensagem.php');
+                require 'View/mensagem.php';
             }
         }
+    }
 
-        break;
+    public function lista() {
 
-    case 'lista'://requisição para listar os contatos cadastrados
-        //inicia a sessão
-        session_start('EmailContato');
+        $result = $this->factory->listar();
+        require 'View/lista.php';
+    }
 
-
-        if (isset($_SESSION['agenda'])) {
-            $result = $_SESSION['agenda'];
-        }
-
-        include('../View/lista.php');
-
-        break;
-    case 'sair'://requisição para destruir a sessão
+    public function out() {
         session_start('EmailContato');
         session_destroy();
-        include('../View/index.php');
 
-        break;
+        require 'View/index.php';
+    }
 
-    default:
-        include('../View/index.php');
-        break;
 }
+
 ?>

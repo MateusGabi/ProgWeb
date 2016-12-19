@@ -7,17 +7,10 @@
  */
 
 /**
- * Description of Contato
+ * Description of ContatoFactory
  *
  * @author 201519060149
  */
-class Contato {
-
-    public $nome;
-    public $email;
-    
-    function __construct($nome, $email) {
-        $this->nome = $nome;
-        $this->email = $email;
-    }
+class ContatoFactory {
+    //put your code here
 }

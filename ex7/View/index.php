@@ -28,10 +28,10 @@
         </div>
 
         <div class="btn-group btn-group-justified" role="group">
-            <a class="btn btn-primary active" href="../View/index.php">Início</a>
-            <a class="btn btn-default" href="../Controller/controle.php?op=novo">Criar contato</a>
-            <a class="btn btn-default" href="../Controller/controle.php?op=lista">Listar contatos</a>
-            <a class="btn btn-default" href="../Controller/controle.php?op=sair">Sair</a>
+            <a class="btn btn-primary active" href="index.php">Início</a>
+            <a class="btn btn-default" href="?op=novo">Criar contato</a>
+            <a class="btn btn-default" href="?op=lista">Listar contatos</a>
+            <a class="btn btn-default" href="?op=sair">Sair</a>
         </div>
         <!--Import jQuery before materialize.js-->
         <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
